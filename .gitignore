@@ -42,10 +42,11 @@ yarn-error.log*
 
 # Environment
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+.env*.local
+.env*.backup
+*.backup
+*.bak*
 
 # Infisical
 .infisical.json
@@ -60,6 +61,12 @@ coverage/
 *.cover
 .coverage
 
+# Xcode / Apple
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
 # OS
 .DS_Store
 Thumbs.db
+

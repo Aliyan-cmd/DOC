@@ -115,7 +115,6 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://use-haven.vercel.app",  # Production frontend
         "http://localhost:3000",          # Local development
         "http://localhost:3001",          # Alternative local port
         "http://localhost:3002",          # Alternative local port
@@ -1854,7 +1853,6 @@ async def websocket_stream(websocket: WebSocket, patient_id: str):
 
     # List of allowed origins (same as CORS middleware)
     allowed_origins = [
-        "https://use-haven.vercel.app",
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:3002",
