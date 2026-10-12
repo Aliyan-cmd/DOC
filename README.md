@@ -1,95 +1,148 @@
 # Haven
 
-<div align="center">
-  <p><em>A multi-agent hospital intelligence platform that coordinates autonomous and contextually aware AI agents for comprehensive patient monitoring and clinical decision support.</em></p>
-  <h3>🏆 1st in Y Combinator & Fetch.ai Track and Best Startup Idea at CalHacks 2025</h3>
-</div>
-
+A multi-agent hospital intelligence platform that coordinates autonomous, context-aware AI agents for real-time patient monitoring, clinical decision support, and hospital resource management.
 
 ---
 
-<div align="center">
-  <img src="Haven AI.gif" alt="Haven AI Dashboard" width="800"/>
-  <br/>
-  <img src="Haven AI Chat.gif" alt="Haven AI Chat" width="800"/>
-  <br/>
-  <img src="Haven Seizure Example.gif" alt="Haven Seizure Detection" width="800"/>
-  <br/>
-  <img src="Haven Shoulder Pain Relief.gif" alt="Haven Shoulder Pain Relief" width="800"/>
-</div>
+## Overview
+
+Haven functions as a central hospital command center that connects real-time sensory data, patient vitals, autonomous agent intelligence, and spatial floor plan mapping into a unified operational dashboard.
+
+Key capabilities include:
+- **Autonomous Multi-Agent Coordination**: Specialized clinical agents collaborate via message passing to handle triage, safety checks, and resource planning.
+- **Real-Time Voice Intake**: Conversational voice interface powered by LiveKit and OpenAI that collects clinical intake details, extracts structured data, and prepares actionable summaries.
+- **Non-Invasive Computer Vision**: Video-based vital sign extraction (facial photoplethysmography / FPPG) and patient movement/fall monitoring.
+- **3D Spatial Floor Plan**: Interactive 3D hospital model rendered with Three.js showing real-time room occupancies, patient statuses, and alert locations.
+- **Emergency Escalation & Telephony**: Multi-channel urgent notifications through Vonage (automated voice calls with DTMF response, SMS, and messaging).
+- **Wearable Device Integration**: Companion Apple Watch application providing continuous telemetry and heart rate monitoring.
 
 ---
-
-## System Overview
-
-Haven operates as a multi-agent hospital command center that coordinates autonomous and contextually aware AI agents for comprehensive patient monitoring and clinical decision support. The platform employs a voice intake agent via **LiveKit and OpenAI** to facilitate natural patient conversations, conducting structured follow-up questioning to collect missing clinical details, accessing validated EHR data, and generating nurse-ready summaries and action items. Multiple **Fetch.ai agents** function as health monitoring agents that continuously track patient vitals and coordinate with specialized agents (including Alert Response Agents) to detect clinical issues and generate appropriate alerts. The system incorporates spatial intelligence capabilities through a **live 3D hospital map** with real-time alert-based room visualization, powered by a **chat agent** with Anthropic Claude chain-tool calling, enabling nurses to manage hospital resources and request clinical summaries through natural language queries.
 
 ## System Architecture
 
-**Voice Processing Pipeline**: The system implements a robust voice interaction framework using LiveKit for real-time audio streaming, OpenAI Whisper for speech-to-text conversion, and Groq LLM for rapid response generation. Voice activity detection utilizes Silero VAD with configurable silence detection (0.3s) and minimum speech duration (0.1s) parameters. The pipeline handles connection drops, partial transcriptions, and overlapping speech through comprehensive exception handling and recovery mechanisms.
+### 1. Voice Processing Pipeline
+- **Real-Time Audio Streaming**: Integrated with LiveKit for low-latency bidirectional audio streaming.
+- **Speech-to-Text**: Real-time transcription via OpenAI Whisper.
+- **Inference & Synthesis**: Accelerated LLM responses paired with natural text-to-speech voice generation.
+- **Voice Activity Detection**: Silero VAD configured for instant turn-taking and minimal interruption lag.
 
-**Multi-Stream Synchronization**: Haven manages concurrent WebSocket streams from multiple sources including LiveKit (voice/video), Fetch.ai agents (vital alerts), and Claude toolchain (map updates). The system implements optimized synchronization protocols to maintain real-time data consistency while processing computer vision pipelines in background threads to prevent UI blocking.
+### 2. Multi-Stream Synchronization
+- Handles concurrent WebSocket streams from LiveKit (voice/video), vital telemetry, and agent alerts.
+- Dedicated background processing for computer vision algorithms to ensure non-blocking UI rendering.
+- Real-time synchronization layer ensuring all connected clients receive consistent state updates.
 
-**Conversation Management**: The platform includes an intelligent summarization pipeline that compresses extended patient conversations while preserving critical clinical information including pain levels, symptom descriptions, and emotional context. This ensures efficient context management across agent communications and LLM interactions.
+### 3. Computer Vision & Vitals Pipeline
+- **Facial Photoplethysmography (FPPG)**: Region-of-interest detection using OpenCV with per-channel color normalization.
+- **Source Separation**: FastICA source separation for heart rate extraction across rolling time windows.
+- **Pose & Activity Detection**: MediaPipe-based landmark estimation for posture monitoring, fall detection, and restlessness analysis.
 
-## Technical Architecture
+### 4. 3D Spatial Floor Plan
+- Interactive hospital layout rendered with Three.js.
+- Real-time color coding and status badges displaying patient acuity, active alerts, and room assignments.
+- Natural language querying powered by Claude tool-calling to look up rooms, check equipment, and allocate resources.
 
-**Multi-Agent Coordination**: Haven employs a distributed agent architecture where specialized agents communicate through message passing and shared state management. Each agent operates independently while maintaining awareness of system-wide events through a centralized event bus.
+---
 
-**Real-Time Data Pipeline**: The system processes multiple concurrent data streams including video feeds (30fps), audio streams (16kHz), vital signs (1Hz), and agent communications. All data flows through WebSocket connections with sub-100ms latency requirements.
+## Multi-Agent Architecture
 
-**Computer Vision Pipeline**: Facial photoplethysmography (FPPG) implementation using OpenCV for ROI detection, per-channel standardization for signal preprocessing, and FastICA source separation for heart rate extraction. The pipeline processes forehead regions at 30fps with 8-second rolling windows for frequency domain analysis.
+Haven deploys specialized autonomous agents configured to communicate through structured message-passing:
 
-**Voice Processing Stack**: LiveKit integration with OpenAI Whisper for real-time transcription, Groq LLM for 75% faster response times, and OpenAI TTS with Nova voice for natural speech synthesis. Voice activity detection uses Silero VAD with 0.3s silence detection and 0.1s speech minimum duration.
+| Agent | Role | Capabilities |
+| :--- | :--- | :--- |
+| **haven_nurse** | Primary Clinical Monitoring | Monitors vitals, evaluates clinical alerts, detects abnormalities, and escalates critical patient conditions. |
+| **haven_reconciliation** | Medication Safety | Cross-references active patient medication lists against new prescriptions to flag drug-drug interactions and contraindications. |
+| **haven_resource_allocation** | Resource & Capacity Planning | Manages bed allocation, ICU transfers, equipment availability, and medical staff distribution based on patient acuity. |
+| **haven_asi_coordinator** | Ecosystem Orchestration | Coordinates inter-agent workflows, routes external diagnostic requests, and manages cross-facility health queries. |
 
-**Spatial Intelligence**: 3D hospital map rendered with Three.js, updated in real-time through Claude chain-tool calling. Room states are managed through Supabase with WebSocket synchronization for instant updates across all connected clients.
+---
 
 ## Tech Stack
-<div align="center">
-  <img src="Haven Tech Stack.png" alt="Haven Tech Stack" width="800"/>
-  <br/>
-</div>
 
-## Future Development
+### Frontend
+- **Framework**: Next.js 15 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **3D Graphics**: Three.js, React Three Fiber, Drei, Smplrspace
+- **State & UI**: Zustand, Framer Motion, Lucide Icons, Recharts
 
-**Agent Ecosystem Expansion**:
-- Medication Reconciliation Agent: Cross-references patient meds with new prescriptions to catch dangerous interactions before they happen
-- Discharge Planning Agent: Coordinates with social workers, pharmacies, and home health services to streamline patient transitions
-- Resource Allocation Agent: Dynamically assigns rooms, equipment, and staff based on real-time hospital capacity and patient acuity
-- Family Communication Agent: Proactively updates loved ones and schedules care conferences, reducing the communication burden on clinical staff
+### Backend
+- **Framework**: FastAPI, Python 3.12, Uvicorn, Gunicorn
+- **WebSockets**: Native ASGI WebSockets for real-time telemetry and streaming
+- **Database & Auth**: Supabase (PostgreSQL, Realtime subscriptions)
 
-**Technical Enhancements**:
-- Reinforcement Learning from Clinical Feedback: nurses would rate agent suggestions, allowing the system to improve accuracy over time and learn hospital-specific workflows
-- Multi-modal Patient Monitoring: Integrate computer vision to detect patient movement patterns, fall risk, and behavioral changes that complement vital sign monitoring
-- Federated Learning Across Hospitals: Enable Haven deployments to learn from each other while maintaining patient privacy, creating a collective intelligence that improves with every installation
+### AI & Agents
+- **Voice & Media**: LiveKit Agents SDK, OpenAI Whisper & TTS, Groq
+- **LLM Reasoning**: Anthropic Claude API
+- **Agent Framework**: Fetch.ai uAgents & ASI Alliance ecosystem
 
-## Fetch.ai Agent Network
+### Computer Vision & Telephony
+- **CV & Signal Analysis**: OpenCV, MediaPipe, NumPy, SciPy
+- **Telephony & Notifications**: Vonage Voice API (TTS & DTMF), Vonage SMS & Messages API
 
-Haven leverages the Fetch.ai uAgents framework and ASI Alliance (asi.one) ecosystem to deploy autonomous agents that coordinate real-time healthcare operations across decentralized infrastructure. Each agent operates independently while communicating through the ASI Alliance network, enabling inter-hospital coordination and access to decentralized AI services from Ocean Protocol and SingularityNET.
+---
 
-### Deployed Agents
-[Access all Haven agents](https://agentverse.ai/agents/agent1q2w5ktcdjujflcq639lp6kj89zupd28yr4dla0z4qampxjf0txwtqjq3ka0)
+## Repository Structure
 
-**haven_nurse** - Primary clinical triage and monitoring agent using Claude AI for real-time patient assessment. Processes vital sign alerts, coordinates emergency responses, escalates critical conditions, and ensures clinical trial compliance. Handles 369 interactions with 2.5 rating on Agentverse.
-[Access Haven_nurse on Agentverse](https://agentverse.ai/agents/details/agent1q2w5ktcdjujflcq639lp6kj89zupd28yr4dla0z4qampxjf0txwtqjq3ka0/profile)
+```
+├── backend/                  # FastAPI backend server
+│   ├── app/                  # Application code (routes, websockets, services)
+│   ├── data/                 # Sample patient and trial protocol data
+│   ├── database/             # Database migrations & schemas
+│   └── scripts/              # Data generation and setup scripts
+├── frontend/                 # Next.js web dashboard
+│   ├── app/                  # Next.js App Router pages (dashboard, patient-view, stream, intake)
+│   ├── components/           # UI components (charts, modals, 3D view, chat)
+│   └── lib/                  # API client configurations and helpers
+├── haven-agents/             # Multi-agent implementations & deployment scripts
+│   ├── agents/               # Clinical agent definitions
+│   └── models/               # Pydantic data models for vitals, alerts, and protocols
+├── supabase/                 # Supabase functions and database configurations
+└── watchos-app/              # Apple Watch (watchOS) vitals streaming companion application
+```
 
-**haven_asi_coordinator** - Central orchestration hub connecting Haven to the broader ASI Alliance ecosystem. Routes complex health queries to Ocean Protocol ML models for predictive analytics, SingularityNET AI services for diagnostic pattern recognition, and Fetch.ai agent networks for resource coordination. Publishes Haven's capabilities to the asi.one marketplace and monitors network health across all three alliance partners.
-[Access Haven_asi_coordinator on Agentverse](https://agentverse.ai/agents/details/agent1qt0f8spkqljl9w4kjth7mv6p62xpfflfwt2z8rg5dytjszsy9q2lke8gutt/profile)
+---
 
-**haven_resource_allocation** - Dynamic hospital resource optimizer managing ICU beds, ventilators, specialist assignments, and equipment allocation based on real-time patient acuity. Coordinates with regional hospitals through ASI Alliance for cross-facility resource sharing during capacity constraints. Monitors utilization metrics and predicts future resource needs using decentralized ML models. Handles 21 interactions on Agentverse.
-[Access Haven_resource_allocation on Agentverse](https://agentverse.ai/agents/details/agent1qvmkluyfdjw802w7xux9vllslsle3fhzkh5la7csjukg6q706xxk6azk66j/profile)
+## Getting Started
 
-**haven_reconciliation** - Medication safety agent that cross-references patient medication lists against new prescriptions to identify dangerous drug interactions before administration. Maintains connection to ASI Alliance drug interaction database and performs periodic audits of all active patients. Generates critical alerts for interactions like warfarin-aspirin bleeding risks or metformin-contrast contraindications. Handles 10 interactions on Agentverse.
-[Access Haven_reconciliation on Agentverse](https://agentverse.ai/agents/details/agent1qg3wkffkfj7g04d5acyaqhx92ecz5w02jp8nm8pkdmurlk974pxezgfqnwf/profile)
+### Prerequisites
+- Node.js (v18+) and npm
+- Python (v3.11 or v3.12)
+- Supabase account or local Supabase instance
 
-### Agent Interlinking Architecture
+### Backend Setup
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Configure your `.env` file (refer to `.env.example`).
+5. Run the backend server:
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
 
-The agents form a coordinated network where each specialized agent handles its domain while communicating through Fetch.ai's message-passing protocol:
-
-**Clinical Workflow**: haven_nurse detects abnormal vitals and sends alerts. When resource escalation is needed (e.g., ICU transfer), nurse agent messages haven_resource_allocation which allocates appropriate beds and equipment. If new medications are prescribed, nurse agent triggers haven_reconciliation to validate safety before administration.
-
-**ASI Alliance Integration**: Complex queries requiring external intelligence route through haven_asi_coordinator. When haven_resource_allocation faces local capacity constraints, coordinator queries ASI Alliance network for regional hospital availability via Ocean Protocol data sharing. When haven_reconciliation needs advanced drug interaction analysis, coordinator accesses SingularityNET AI diagnostic services. All agents publish their availability to asi.one marketplace for discoverability by other healthcare networks.
-
-**Multi-Agent Orchestration**: haven_asi_coordinator orchestrates workflows spanning multiple alliance services - aggregating patient cohort data through Ocean Protocol, running predictive models via SingularityNET, and coordinating resource transfers through Fetch.ai agent networks. This enables capabilities beyond any single agent, such as predicting ICU demand 6 hours ahead using decentralized ML while simultaneously arranging resource pre-positioning.
-
-
+### Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables in `.env.local`:
+   ```bash
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
