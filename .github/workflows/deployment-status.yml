@@ -10,6 +10,8 @@ on:
 jobs:
   health-check:
     runs-on: ubuntu-latest
+    env:
+      BACKEND_HEALTH_URL: ${{ vars.BACKEND_HEALTH_URL || 'https://haven-backend.onrender.com/health' }}
     steps:
       - name: Wait for Deployment
         if: github.event_name == 'push'
@@ -19,13 +21,18 @@ jobs:
       
       - name: Check Backend Health
         run: |
-          echo "🔍 Checking backend health at https://haven-new.onrender.com/health"
+          echo "🔍 Checking backend health at $BACKEND_HEALTH_URL"
           
           MAX_ATTEMPTS=5
           ATTEMPT=0
           
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://haven-new.onrender.com/health || echo "000")
+            if ! STATUS_CODE=$(curl --silent --show-error --location \
+              --connect-timeout 10 --max-time 30 \
+              --output /dev/null --write-out "%{http_code}" \
+              "$BACKEND_HEALTH_URL"); then
+              STATUS_CODE="000"
+            fi
             
             if [ "$STATUS_CODE" = "200" ]; then
               echo "✅ Backend is healthy!"
@@ -42,7 +49,7 @@ jobs:
       
       - name: Success Notification
         if: success()
-        run: echo "::notice::Backend is healthy at https://haven-new.onrender.com"
+        run: echo "::notice::Backend is healthy at $BACKEND_HEALTH_URL"
       
       - name: Failure Notification
         if: failure()
